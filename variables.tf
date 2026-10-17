@@ -35,7 +35,7 @@ variable "network_name" {
   default     = null
 
   validation {
-    condition     = var.network_name == null || length(var.network_name) > 0
+    condition     = var.network_name == null ? true : length(var.network_name) > 0
     error_message = "If provided, network_name must not be an empty string."
   }
 }
@@ -46,7 +46,7 @@ variable "network_region" {
   default     = null
 
   validation {
-    condition     = var.network_region == null || length(var.network_region) > 0
+    condition     = var.network_region == null ? true : length(var.network_region) > 0
     error_message = "network_region must not be an empty list."
   }
 }
@@ -68,21 +68,22 @@ variable "network_vlan_id" {
 variable "subnets" {
   description = "List of subnets to create in the private network."
   type = list(object({
-    region        = string
-    cidr          = string
-    start_ip      = string
-    end_ip        = string
-    dhcp_enabled  = bool
-    no_gateway    = bool
+    region       = string
+    cidr         = string
+    start_ip     = string
+    end_ip       = string
+    dhcp_enabled = bool
+    no_gateway   = bool
   }))
+  default = []
 
   validation {
     condition = alltrue([
       for s in var.subnets :
-        can(cidrnetmask(s.cidr)) &&
-        length(s.region) > 0 &&
-        length(s.start_ip) > 0 &&
-        length(s.end_ip) > 0
+      can(cidrnetmask(s.cidr)) &&
+      length(s.region) > 0 &&
+      length(s.start_ip) > 0 &&
+      length(s.end_ip) > 0
     ])
     error_message = "Each subnet must define a valid CIDR, region, start_ip and end_ip."
   }
@@ -96,16 +97,16 @@ variable "gateways" {
   description = "List of gateways. One gateway per subnet when create_gateway = true."
   type = list(object({
     region = string
-    name  = optional(string)
-    model = optional(string)
+    name   = string
+    model  = string
   }))
   default = []
   validation {
     condition = alltrue([
       for g in var.gateways :
-        length(g.name)  > 0 &&
-        length(g.model) > 0 &&
-        length(g.region) > 0
+      length(g.name) > 0 &&
+      length(g.model) > 0 &&
+      length(g.region) > 0
     ])
     error_message = "Each gateway must have a non-empty name and model."
   }

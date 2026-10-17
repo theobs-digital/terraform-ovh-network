@@ -4,19 +4,19 @@
 
 locals {
   # Defaults
-  network_name    = var.network_name != null && length(var.network_name) > 0 ? var.network_name : "private-network-${var.network_vlan_id}"
-  network_regions = var.network_region != null && length(var.network_region) > 0 ? var.network_region : ["EU-WEST-PAR"]
+  network_name    = coalesce(var.network_name, "private-network-${var.network_vlan_id}")
+  network_regions = coalescelist(var.network_region, ["EU-WEST-PAR"])
 
-  create_network  = var.create_network
+  create_network = var.create_network
 
   # Regiions list for subnets uniqueness validation
   subnet_regions = [for s in var.subnets : s.region]
 
   # Subnet
-  create_subnet   = var.create_subnet
- 
+  create_subnet = var.create_subnet
+
   # Gateway
-  create_gateway  = var.create_gateway
+  create_gateway = var.create_gateway
 
   gateways_by_region = local.create_gateway ? {
     for g in try(var.gateways, []) : g.region => g
@@ -52,7 +52,7 @@ resource "null_resource" "validations" {
 ###############################################################################
 
 resource "ovh_cloud_project_network_private" "this" {
-  count        = local.create_network ? 1 : 0
+  count = local.create_network ? 1 : 0
 
   service_name = var.service_name
   name         = local.network_name
@@ -91,5 +91,5 @@ resource "ovh_cloud_project_gateway" "this" {
 
   network_id = ovh_cloud_project_network_private.this[0].regions_openstack_ids[each.key]
 
-  subnet_id  = ovh_cloud_project_network_private_subnet.this[each.key].id
+  subnet_id = ovh_cloud_project_network_private_subnet.this[each.key].id
 }
