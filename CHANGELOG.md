@@ -7,6 +7,8 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-17
+
 ### Fixed
 
 - Terraform 1.3 to 1.11: a call without `network_name` or `network_region` failed, because `&&` and `||` evaluated `length()` on `null` too; Terraform evaluates only one side since 1.12
@@ -31,3 +33,7 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ### Added
 
 - OVHcloud private network, with optional subnets and gateways, one per region
+
+[Unreleased]: https://github.com/theobs-digital/terraform-ovh-network/compare/v0.1.0...main
+[0.1.0]: https://github.com/theobs-digital/terraform-ovh-network/compare/0.0.1...v0.1.0
+[0.0.1]: https://github.com/theobs-digital/terraform-ovh-network/releases/tag/0.0.1
