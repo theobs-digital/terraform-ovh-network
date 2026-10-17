@@ -40,11 +40,11 @@ output "gateways" {
   value = {
     for region, g in ovh_cloud_project_gateway.this :
     region => {
-      id        = g.id
-      name      = g.name
-      model     = g.model
-      region    = g.region
-      subnet_id = g.subnet_id
+      id         = g.id
+      name       = g.name
+      model      = g.model
+      region     = g.region
+      subnet_id  = g.subnet_id
       network_id = g.network_id
     }
   }
