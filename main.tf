@@ -4,8 +4,8 @@
 
 locals {
   # Defaults
-  network_name    = coalesce(var.network_name, "private-network-${var.network_vlan_id}")
-  network_regions = coalescelist(var.network_region, ["EU-WEST-PAR"])
+  network_name    = coalesce(var.name, "private-network-${var.vlan_id}")
+  network_regions = coalescelist(var.regions, ["EU-WEST-PAR"])
 
   create_network = var.create_network
 
@@ -17,10 +17,6 @@ locals {
 
   # Gateway
   create_gateway = var.create_gateway
-
-  gateways_by_region = local.create_gateway ? {
-    for g in try(var.gateways, []) : g.region => g
-  } : {}
 
 }
 
@@ -57,7 +53,7 @@ resource "ovh_cloud_project_network_private" "this" {
   service_name = var.service_name
   name         = local.network_name
   regions      = local.network_regions
-  vlan_id      = var.network_vlan_id
+  vlan_id      = var.vlan_id
 }
 
 ###############################################################################
@@ -65,15 +61,15 @@ resource "ovh_cloud_project_network_private" "this" {
 ###############################################################################
 
 resource "ovh_cloud_project_network_private_subnet" "this" {
-  for_each = (local.create_network && local.create_subnet) ? { for subnet in var.subnets : subnet.region => subnet } : {}
+  for_each = (local.create_network && local.create_subnet) ? var.subnets : {}
 
   service_name = var.service_name
   network_id   = ovh_cloud_project_network_private.this[0].id
   region       = each.value.region
-  network      = each.value.cidr
-  start        = each.value.start_ip
-  end          = each.value.end_ip
-  dhcp         = each.value.dhcp_enabled
+  network      = each.value.network
+  start        = each.value.start
+  end          = each.value.end
+  dhcp         = each.value.dhcp
   no_gateway   = each.value.no_gateway
 }
 
@@ -82,14 +78,15 @@ resource "ovh_cloud_project_network_private_subnet" "this" {
 ###############################################################################
 
 resource "ovh_cloud_project_gateway" "this" {
-  for_each = (local.create_network && local.create_subnet && local.create_gateway) ? local.gateways_by_region : {}
+  for_each = (local.create_network && local.create_subnet && local.create_gateway) ? var.gateways : {}
 
   service_name = var.service_name
   name         = each.value.name
   model        = each.value.model
   region       = each.value.region
 
-  network_id = ovh_cloud_project_network_private.this[0].regions_openstack_ids[each.key]
+  network_id = ovh_cloud_project_network_private.this[0].regions_openstack_ids[each.value.region]
 
-  subnet_id = ovh_cloud_project_network_private_subnet.this[each.key].id
+  # The subnet of its region, whatever the keys.
+  subnet_id = one([for subnet in ovh_cloud_project_network_private_subnet.this : subnet.id if subnet.region == each.value.region])
 }

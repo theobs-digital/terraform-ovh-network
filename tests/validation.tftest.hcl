@@ -1,12 +1,12 @@
 mock_provider "ovh" {}
 
 variables {
-  service_name    = "0123456789abcdef0123456789abcdef"
-  network_vlan_id = 604
-  subnets = [
-    { region = "EU-WEST-PAR", cidr = "10.58.0.0/16", start_ip = "10.58.0.2", end_ip = "10.58.0.254", dhcp_enabled = true, no_gateway = false },
-    { region = "EU-WEST-GRA", cidr = "10.36.0.0/16", start_ip = "10.36.0.2", end_ip = "10.36.0.254", dhcp_enabled = true, no_gateway = false },
-  ]
+  service_name = "0123456789abcdef0123456789abcdef"
+  vlan_id      = 604
+  subnets = {
+    "EU-WEST-PAR" = { region = "EU-WEST-PAR", network = "10.58.0.0/16", start = "10.58.0.2", end = "10.58.0.254", dhcp = true, no_gateway = false }
+    "EU-WEST-GRA" = { region = "EU-WEST-GRA", network = "10.36.0.0/16", start = "10.36.0.2", end = "10.36.0.254", dhcp = true, no_gateway = false }
+  }
 }
 
 run "subnets_need_the_network" {
@@ -26,9 +26,9 @@ run "one_gateway_per_subnet" {
 
   variables {
     create_gateway = true
-    gateways = [
-      { region = "EU-WEST-PAR", name = "gw-par", model = "s" },
-    ]
+    gateways = {
+      "EU-WEST-PAR" = { region = "EU-WEST-PAR", name = "gw-par", model = "s" }
+    }
   }
 
   expect_failures = [
@@ -40,11 +40,11 @@ run "vlan_id_above_zero" {
   command = plan
 
   variables {
-    network_vlan_id = 0
+    vlan_id = 0
   }
 
   expect_failures = [
-    var.network_vlan_id,
+    var.vlan_id,
   ]
 }
 
@@ -52,11 +52,11 @@ run "network_name_not_empty" {
   command = plan
 
   variables {
-    network_name = ""
+    name = ""
   }
 
   expect_failures = [
-    var.network_name,
+    var.name,
   ]
 }
 
@@ -64,11 +64,11 @@ run "network_region_not_empty" {
   command = plan
 
   variables {
-    network_region = []
+    regions = []
   }
 
   expect_failures = [
-    var.network_region,
+    var.regions,
   ]
 }
 
@@ -76,9 +76,9 @@ run "subnet_cidr" {
   command = plan
 
   variables {
-    subnets = [
-      { region = "EU-WEST-PAR", cidr = "10.58.0.0", start_ip = "10.58.0.2", end_ip = "10.58.0.254", dhcp_enabled = true, no_gateway = false },
-    ]
+    subnets = {
+      "EU-WEST-PAR" = { region = "EU-WEST-PAR", network = "10.58.0.0", start = "10.58.0.2", end = "10.58.0.254", dhcp = true, no_gateway = false }
+    }
   }
 
   expect_failures = [
@@ -90,9 +90,9 @@ run "gateway_name_not_empty" {
   command = plan
 
   variables {
-    gateways = [
-      { region = "EU-WEST-PAR", name = "", model = "s" },
-    ]
+    gateways = {
+      "EU-WEST-PAR" = { region = "EU-WEST-PAR", name = "", model = "s" }
+    }
   }
 
   expect_failures = [

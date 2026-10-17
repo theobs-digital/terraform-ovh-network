@@ -7,6 +7,22 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING**: variables aligned on the provider's attributes:
+
+  | Before | After |
+  |---|---|
+  | `network_name` | `name` |
+  | `network_region` | `regions` |
+  | `network_vlan_id` | `vlan_id` |
+  | `subnets.cidr` | `subnets.network` |
+  | `subnets.start_ip` | `subnets.start` |
+  | `subnets.end_ip` | `subnets.end` |
+  | `subnets.dhcp_enabled` | `subnets.dhcp` |
+  | `subnets`, a list | `subnets`, a map: key each subnet by its `region` to keep it in the state |
+  | `gateways`, a list | `gateways`, a map: key each gateway by its `region` to keep it in the state |
+
 ## [0.1.0] - 2026-10-17
 
 ### Fixed

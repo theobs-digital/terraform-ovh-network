@@ -1,21 +1,17 @@
-###############################################################################
-# Global Controls
-###############################################################################
-
 variable "create_network" {
-  description = "If true, create a new OVH private network."
+  description = "Whether the module creates a new OVH private network."
   type        = bool
   default     = true
 }
 
 variable "create_subnet" {
-  description = "If true, create subnets for the private network."
+  description = "Whether the module creates subnets for the private network."
   type        = bool
   default     = true
 }
 
 variable "create_gateway" {
-  description = "If true, create one gateway per subnet."
+  description = "Whether the module creates one gateway per subnet."
   type        = bool
   default     = false
 }
@@ -25,82 +21,70 @@ variable "service_name" {
   type        = string
 }
 
-###############################################################################
-# Network Variables
-###############################################################################
-
-variable "network_name" {
+variable "name" {
   description = "Name of the private network. If null, an automatic name is generated."
   type        = string
   default     = null
 
   validation {
-    condition     = var.network_name == null ? true : length(var.network_name) > 0
-    error_message = "If provided, network_name must not be an empty string."
+    condition     = var.name == null ? true : length(var.name) > 0
+    error_message = "If provided, name must not be an empty string."
   }
 }
 
-variable "network_region" {
+variable "regions" {
   description = "List of regions where the network will be available."
   type        = list(string)
   default     = null
 
   validation {
-    condition     = var.network_region == null ? true : length(var.network_region) > 0
-    error_message = "network_region must not be an empty list."
+    condition     = var.regions == null ? true : length(var.regions) > 0
+    error_message = "regions must not be an empty list."
   }
 }
 
-variable "network_vlan_id" {
+variable "vlan_id" {
   description = "The VLAN ID of the network. Must be greater than zero."
   type        = number
 
   validation {
-    condition     = var.network_vlan_id > 0
-    error_message = "network_vlan_id must be greater than 0."
+    condition     = var.vlan_id > 0
+    error_message = "vlan_id must be greater than 0."
   }
 }
 
-###############################################################################
-# Subnet Variables
-###############################################################################
-
 variable "subnets" {
-  description = "List of subnets to create in the private network."
-  type = list(object({
-    region       = string
-    cidr         = string
-    start_ip     = string
-    end_ip       = string
-    dhcp_enabled = bool
-    no_gateway   = bool
+  description = "Subnets to create in the private network, by a key of your choice. The key only names the subnet in the state: keep it stable, since renaming a key replaces the subnet."
+  type = map(object({
+    region     = string
+    network    = string
+    start      = string
+    end        = string
+    dhcp       = bool
+    no_gateway = bool
   }))
-  default = []
+  default = {}
 
   validation {
     condition = alltrue([
       for s in var.subnets :
-      can(cidrnetmask(s.cidr)) &&
+      can(cidrnetmask(s.network)) &&
       length(s.region) > 0 &&
-      length(s.start_ip) > 0 &&
-      length(s.end_ip) > 0
+      length(s.start) > 0 &&
+      length(s.end) > 0
     ])
-    error_message = "Each subnet must define a valid CIDR, region, start_ip and end_ip."
+    error_message = "Each subnet must define a valid CIDR network, region, start and end."
   }
 }
 
-###############################################################################
-# Gateway Variables
-###############################################################################
-
 variable "gateways" {
-  description = "List of gateways. One gateway per subnet when create_gateway = true."
-  type = list(object({
+  description = "Gateways, by a key of your choice. The key only names the gateway in the state: keep it stable, since renaming a key replaces the gateway. One gateway per subnet when `create_gateway = true`, each using the subnet of its region."
+  type = map(object({
     region = string
     name   = string
     model  = string
   }))
-  default = []
+  default = {}
   validation {
     condition = alltrue([
       for g in var.gateways :

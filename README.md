@@ -42,7 +42,7 @@ Terraform module to create and manage an OVHcloud private network, its subnets, 
 | Name | Description |
 |----|------------|
 | `service_name` | OVHcloud project ID |
-| `network_vlan_id` | Private network VLAN ID |
+| `vlan_id` | Private network VLAN ID |
 
 ---
 
@@ -50,13 +50,13 @@ Terraform module to create and manage an OVHcloud private network, its subnets, 
 
 | Name | Type | Default | Description |
 |----|----|----|----|
-| `network_name` | `string` | `private-network-${network_vlan_id}` | Network name |
-| `network_region` | `list(string)` | `["EU-WEST-PAR"]` | Network regions |
+| `name` | `string` | `private-network-${vlan_id}` | Network name |
+| `regions` | `list(string)` | `["EU-WEST-PAR"]` | Network regions |
 | `create_network` | `bool` | `true` | Create the network |
 | `create_subnet` | `bool` | `true` | Create subnets |
 | `create_gateway` | `bool` | `false` | Create gateways |
-| `subnets` | `list(object)` | `[]` | Subnet definitions |
-| `gateways` | `list(object)` | `[]` | Gateway definitions |
+| `subnets` | `map(object)` | `{}` | Subnet definitions, by a key of your choice |
+| `gateways` | `map(object)` | `{}` | Gateway definitions, by a key of your choice |
 
 ---
 
@@ -65,10 +65,10 @@ Terraform module to create and manage an OVHcloud private network, its subnets, 
 | Field | Type | Description |
 |----|----|------------|
 | `region` | `string` | OVHcloud region |
-| `cidr` | `string` | Subnet CIDR |
-| `start_ip` | `string` | First usable IP |
-| `end_ip` | `string` | Last usable IP |
-| `dhcp_enabled` | `bool` | Enable DHCP |
+| `network` | `string` | Subnet CIDR |
+| `start` | `string` | First usable IP |
+| `end` | `string` | Last usable IP |
+| `dhcp` | `bool` | Enable DHCP |
 | `no_gateway` | `bool` | Disable OVH gateway |
 
 ---
@@ -103,23 +103,23 @@ Any invalid configuration is blocked at `terraform plan` time.
 module "network" {
   source = "git::https://github.com/theobs-digital/terraform-ovh-network.git?ref=v0.1.0"
 
-  service_name    = var.service_name
-  network_vlan_id = 604
+  service_name = var.service_name
+  vlan_id      = 604
 
   create_network = true
   create_subnet  = true
   create_gateway = false
 
-  subnets = [
-    {
-      region        = "EU-WEST-PAR"
-      cidr          = "10.58.0.0/16"
-      start_ip      = "10.58.0.2"
-      end_ip        = "10.58.0.254"
-      dhcp_enabled  = true
-      no_gateway    = false
+  subnets = {
+    "EU-WEST-PAR" = {
+      region     = "EU-WEST-PAR"
+      network    = "10.58.0.0/16"
+      start      = "10.58.0.2"
+      end        = "10.58.0.254"
+      dhcp       = true
+      no_gateway = false
     }
-  ]
+  }
 }
 ```
 
@@ -129,45 +129,45 @@ module "network" {
 module "network" {
   source = "git::https://github.com/theobs-digital/terraform-ovh-network.git?ref=v0.1.0"
 
-  service_name    = var.service_name
-  network_vlan_id = 604
-  network_region  = ["EU-WEST-PAR", "GRA9"]
+  service_name = var.service_name
+  vlan_id      = 604
+  regions      = ["EU-WEST-PAR", "GRA9"]
 
   create_network = true
   create_subnet  = true
   create_gateway = true
 
-  subnets = [
-    {
-      region        = "EU-WEST-PAR"
-      cidr          = "10.58.0.0/16"
-      start_ip      = "10.58.0.2"
-      end_ip        = "10.58.0.254"
-      dhcp_enabled  = true
-      no_gateway    = false
-    },
-    {
-      region        = "GRA9"
-      cidr          = "10.36.0.0/16"
-      start_ip      = "10.36.0.2"
-      end_ip        = "10.36.0.254"
-      dhcp_enabled  = true
-      no_gateway    = false
+  subnets = {
+    "EU-WEST-PAR" = {
+      region     = "EU-WEST-PAR"
+      network    = "10.58.0.0/16"
+      start      = "10.58.0.2"
+      end        = "10.58.0.254"
+      dhcp       = true
+      no_gateway = false
     }
-  ]
+    "GRA9" = {
+      region     = "GRA9"
+      network    = "10.36.0.0/16"
+      start      = "10.36.0.2"
+      end        = "10.36.0.254"
+      dhcp       = true
+      no_gateway = false
+    }
+  }
 
-  gateways = [
-    {
+  gateways = {
+    "EU-WEST-PAR" = {
       region = "EU-WEST-PAR"
       name   = "gw-par"
       model  = "s"
-    },
-    {
+    }
+    "GRA9" = {
       region = "GRA9"
       name   = "gw-gra"
       model  = "s"
     }
-  ]
+  }
 }
 ```
 
@@ -189,17 +189,17 @@ The following resources are used by this module:
 
 The following input variables are required:
 
-#### <a name="input_network_vlan_id"></a> [network\_vlan\_id](#input\_network\_vlan\_id)
-
-Description: The VLAN ID of the network. Must be greater than zero.
-
-Type: `number`
-
 #### <a name="input_service_name"></a> [service\_name](#input\_service\_name)
 
 Description: The OVHcloud Project service name.
 
 Type: `string`
+
+#### <a name="input_vlan_id"></a> [vlan\_id](#input\_vlan\_id)
+
+Description: The VLAN ID of the network. Must be greater than zero.
+
+Type: `number`
 
 ### Optional Inputs
 
@@ -207,7 +207,7 @@ The following input variables are optional (have default values):
 
 #### <a name="input_create_gateway"></a> [create\_gateway](#input\_create\_gateway)
 
-Description: If true, create one gateway per subnet.
+Description: Whether the module creates one gateway per subnet.
 
 Type: `bool`
 
@@ -215,7 +215,7 @@ Default: `false`
 
 #### <a name="input_create_network"></a> [create\_network](#input\_create\_network)
 
-Description: If true, create a new OVH private network.
+Description: Whether the module creates a new OVH private network.
 
 Type: `bool`
 
@@ -223,7 +223,7 @@ Default: `true`
 
 #### <a name="input_create_subnet"></a> [create\_subnet](#input\_create\_subnet)
 
-Description: If true, create subnets for the private network.
+Description: Whether the module creates subnets for the private network.
 
 Type: `bool`
 
@@ -231,21 +231,21 @@ Default: `true`
 
 #### <a name="input_gateways"></a> [gateways](#input\_gateways)
 
-Description: List of gateways. One gateway per subnet when create\_gateway = true.
+Description: Gateways, by a key of your choice. The key only names the gateway in the state: keep it stable, since renaming a key replaces the gateway. One gateway per subnet when `create_gateway = true`, each using the subnet of its region.
 
 Type:
 
 ```hcl
-list(object({
+map(object({
     region = string
     name   = string
     model  = string
   }))
 ```
 
-Default: `[]`
+Default: `{}`
 
-#### <a name="input_network_name"></a> [network\_name](#input\_network\_name)
+#### <a name="input_name"></a> [name](#input\_name)
 
 Description: Name of the private network. If null, an automatic name is generated.
 
@@ -253,7 +253,7 @@ Type: `string`
 
 Default: `null`
 
-#### <a name="input_network_region"></a> [network\_region](#input\_network\_region)
+#### <a name="input_regions"></a> [regions](#input\_regions)
 
 Description: List of regions where the network will be available.
 
@@ -263,22 +263,22 @@ Default: `null`
 
 #### <a name="input_subnets"></a> [subnets](#input\_subnets)
 
-Description: List of subnets to create in the private network.
+Description: Subnets to create in the private network, by a key of your choice. The key only names the subnet in the state: keep it stable, since renaming a key replaces the subnet.
 
 Type:
 
 ```hcl
-list(object({
-    region       = string
-    cidr         = string
-    start_ip     = string
-    end_ip       = string
-    dhcp_enabled = bool
-    no_gateway   = bool
+map(object({
+    region     = string
+    network    = string
+    start      = string
+    end        = string
+    dhcp       = bool
+    no_gateway = bool
   }))
 ```
 
-Default: `[]`
+Default: `{}`
 
 ### Outputs
 
@@ -286,7 +286,7 @@ The following outputs are exported:
 
 #### <a name="output_gateways"></a> [gateways](#output\_gateways)
 
-Description: Map of gateways indexed by region, containing all attributes.
+Description: Map of gateways indexed by their key in `gateways`, containing all attributes.
 
 #### <a name="output_module_summary"></a> [module\_summary](#output\_module\_summary)
 
@@ -298,5 +298,5 @@ Description: Information about the created OVH private network.
 
 #### <a name="output_subnets"></a> [subnets](#output\_subnets)
 
-Description: Map of subnets indexed by region, containing all attributes.
+Description: Map of subnets indexed by their key in `subnets`, containing all attributes.
 <!-- END_TF_DOCS -->
