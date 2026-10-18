@@ -29,9 +29,8 @@ Terraform module to create and manage an OVHcloud private network, its subnets, 
 
 | | Version | Checked with |
 |---|---|---|
-| Terraform | `>= 1.3` | 1.3.10 and 1.16.5 |
+| Terraform | `>= 1.4` | 1.4.7 and 1.16.5 |
 | Provider [`ovh/ovh`](https://registry.terraform.io/providers/ovh/ovh/latest) | `~> 2.5` | 2.5.0 and 2.22.0 |
-| Provider [`hashicorp/null`](https://registry.terraform.io/providers/hashicorp/null/latest) | `~> 3.0` | 3.0.0 and 3.3.2 |
 
 ---
 
@@ -42,7 +41,7 @@ Terraform module to create and manage an OVHcloud private network, its subnets, 
 | Name | Description |
 |----|------------|
 | `service_name` | OVHcloud project ID |
-| `vlan_id` | Private network VLAN ID |
+| `vlan_id` | Private network VLAN ID, from 0 to 4095, 0 for no VLAN |
 
 ---
 
@@ -51,7 +50,7 @@ Terraform module to create and manage an OVHcloud private network, its subnets, 
 | Name | Type | Default | Description |
 |----|----|----|----|
 | `name` | `string` | `private-network-${vlan_id}` | Network name |
-| `regions` | `list(string)` | `["EU-WEST-PAR"]` | Network regions |
+| `regions` | `list(string)` | `null`: every region | Network regions |
 | `create_network` | `bool` | `true` | Create the network |
 | `create_subnet` | `bool` | `true` | Create subnets |
 | `create_gateway` | `bool` | `false` | Create gateways |
@@ -79,7 +78,7 @@ Terraform module to create and manage an OVHcloud private network, its subnets, 
 |----|----|------------|
 | `region` | `string` | OVHcloud region |
 | `name` | `string` | Gateway name |
-| `model` | `string` | Gateway model |
+| `model` | `string` | Gateway model: `s`, `m`, `l`, `xl`, `2xl` or `3xl`, which the API checks at apply |
 
 ---
 
@@ -180,10 +179,10 @@ More in the examples: [basic](examples/basic) and [complete](examples/complete).
 
 The following resources are used by this module:
 
-- [null_resource.validations](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) (resource)
 - [ovh_cloud_project_gateway.this](https://registry.terraform.io/providers/ovh/ovh/latest/docs/resources/cloud_project_gateway) (resource)
 - [ovh_cloud_project_network_private.this](https://registry.terraform.io/providers/ovh/ovh/latest/docs/resources/cloud_project_network_private) (resource)
 - [ovh_cloud_project_network_private_subnet.this](https://registry.terraform.io/providers/ovh/ovh/latest/docs/resources/cloud_project_network_private_subnet) (resource)
+- [terraform_data.validations](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
 
 ### Required Inputs
 
@@ -197,7 +196,7 @@ Type: `string`
 
 #### <a name="input_vlan_id"></a> [vlan\_id](#input\_vlan\_id)
 
-Description: The VLAN ID of the network. Must be greater than zero.
+Description: VLAN ID of the network, from 0 to 4095, 0 for no VLAN.
 
 Type: `number`
 
@@ -255,7 +254,7 @@ Default: `null`
 
 #### <a name="input_regions"></a> [regions](#input\_regions)
 
-Description: List of regions where the network will be available.
+Description: Regions of the network, such as `GRA9`. Left out, the network is in every region, the provider's default.
 
 Type: `list(string)`
 

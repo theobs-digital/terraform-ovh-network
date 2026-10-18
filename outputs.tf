@@ -7,7 +7,7 @@ output "network" {
   value = local.create_network ? {
     id                    = ovh_cloud_project_network_private.this[0].id
     name                  = local.network_name
-    regions               = local.network_regions
+    regions               = ovh_cloud_project_network_private.this[0].regions
     regions_openstack_ids = ovh_cloud_project_network_private.this[0].regions_openstack_ids
   } : null
 }

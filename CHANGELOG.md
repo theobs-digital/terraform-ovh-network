@@ -23,6 +23,10 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   | `subnets`, a list | `subnets`, a map: key each subnet by its `region` to keep it in the state |
   | `gateways`, a list | `gateways`, a map: key each gateway by its `region` to keep it in the state |
 
+- **BREAKING**: `regions` left out puts the network in every region, the provider's default, instead of `EU-WEST-PAR` alone. To keep a network created without `regions` as it is, set `regions = ["EU-WEST-PAR"]`; otherwise the next apply extends it to every region, in place. `regions = []` is no longer refused, and means the same. The output `network.regions` gives the regions the provider reads, a set
+- `vlan_id` takes 0, a network without VLAN, as the API does, and refuses more than 4095
+- **BREAKING**: Terraform 1.4 or later. `terraform_data` carries the preconditions instead of `null_resource`, and the module no longer needs the provider `hashicorp/null`. The first plan replaces `null_resource.validations` with `terraform_data.validations`, two entries of the state with nothing behind them at OVHcloud
+
 ## [0.1.0] - 2026-10-17
 
 ### Fixed
