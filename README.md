@@ -100,7 +100,7 @@ Any invalid configuration is blocked at `terraform plan` time.
 
 ```hcl
 module "network" {
-  source = "git::https://github.com/theobs-digital/terraform-ovh-network.git?ref=v0.1.0"
+  source = "git::https://github.com/theobs-digital/terraform-ovh-network.git?ref=v0.2.0"
 
   service_name = var.service_name
   vlan_id      = 604
@@ -126,7 +126,7 @@ module "network" {
 
 ```hcl
 module "network" {
-  source = "git::https://github.com/theobs-digital/terraform-ovh-network.git?ref=v0.1.0"
+  source = "git::https://github.com/theobs-digital/terraform-ovh-network.git?ref=v0.2.0"
 
   service_name = var.service_name
   vlan_id      = 604

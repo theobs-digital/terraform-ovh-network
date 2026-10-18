@@ -7,6 +7,8 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-18
+
 ### Added
 
 - The workflow `Release`: the GitHub release of each tag, with its section of this file as notes
@@ -60,6 +62,7 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - OVHcloud private network, with optional subnets and gateways, one per region
 
-[Unreleased]: https://github.com/theobs-digital/terraform-ovh-network/compare/v0.1.0...main
+[Unreleased]: https://github.com/theobs-digital/terraform-ovh-network/compare/v0.2.0...main
+[0.2.0]: https://github.com/theobs-digital/terraform-ovh-network/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/theobs-digital/terraform-ovh-network/compare/0.0.1...v0.1.0
 [0.0.1]: https://github.com/theobs-digital/terraform-ovh-network/releases/tag/0.0.1
