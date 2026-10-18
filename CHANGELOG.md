@@ -7,6 +7,12 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- The workflow `Release`: the GitHub release of each tag, with its section of this file as notes
+- Tests against the real API, in `tests-real`: a configuration that calls the module, a private network `tf-test-ci-network` on VLAN 4000 with one subnet and one gateway of model `s`, applied, planned again, which must show no change, then destroyed
+- The workflow `Real API tests`: runs them on demand, weekly once its schedule is uncommented, and destroys what they created even when a step fails
+
 ### Changed
 
 - **BREAKING**: variables aligned on the provider's attributes:
