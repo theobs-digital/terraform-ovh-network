@@ -17,10 +17,10 @@ output "network" {
 ###############################################################################
 
 output "subnets" {
-  description = "Map of subnets indexed by region, containing all attributes."
+  description = "Map of subnets indexed by their key in `subnets`, containing all attributes."
   value = {
-    for region, s in ovh_cloud_project_network_private_subnet.this :
-    region => {
+    for key, s in ovh_cloud_project_network_private_subnet.this :
+    key => {
       id         = s.id
       cidr       = s.network
       start_ip   = s.start
@@ -36,10 +36,10 @@ output "subnets" {
 ###############################################################################
 
 output "gateways" {
-  description = "Map of gateways indexed by region, containing all attributes."
+  description = "Map of gateways indexed by their key in `gateways`, containing all attributes."
   value = {
-    for region, g in ovh_cloud_project_gateway.this :
-    region => {
+    for key, g in ovh_cloud_project_gateway.this :
+    key => {
       id         = g.id
       name       = g.name
       model      = g.model
@@ -59,7 +59,7 @@ output "module_summary" {
   description = "Summary of ids created by this module."
   value = {
     network_id = local.create_network ? ovh_cloud_project_network_private.this[0].id : null
-    subnets    = { for region, s in ovh_cloud_project_network_private_subnet.this : region => s.id }
-    gateways   = { for region, g in ovh_cloud_project_gateway.this : region => g.id }
+    subnets    = { for key, s in ovh_cloud_project_network_private_subnet.this : key => s.id }
+    gateways   = { for key, g in ovh_cloud_project_gateway.this : key => g.id }
   }
 }

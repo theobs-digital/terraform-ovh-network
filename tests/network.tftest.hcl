@@ -11,8 +11,8 @@ mock_provider "ovh" {
 }
 
 variables {
-  service_name    = "0123456789abcdef0123456789abcdef"
-  network_vlan_id = 604
+  service_name = "0123456789abcdef0123456789abcdef"
+  vlan_id      = 604
 }
 
 run "network_only" {
@@ -22,12 +22,12 @@ run "network_only" {
 
   assert {
     condition     = ovh_cloud_project_network_private.this[0].name == "private-network-604" && ovh_cloud_project_network_private.this[0].vlan_id == 604
-    error_message = "Without network_name, the network must be named after its VLAN."
+    error_message = "Without name, the network must be named after its VLAN."
   }
 
   assert {
     condition     = tolist(ovh_cloud_project_network_private.this[0].regions) == tolist(["EU-WEST-PAR"])
-    error_message = "Without network_region, the network must be in EU-WEST-PAR."
+    error_message = "Without regions, the network must be in EU-WEST-PAR."
   }
 
   assert {
@@ -55,17 +55,17 @@ run "no_network" {
 
 run "subnets" {
   variables {
-    network_name   = "backend"
-    network_region = ["EU-WEST-PAR", "EU-WEST-GRA"]
-    subnets = [
-      { region = "EU-WEST-PAR", cidr = "10.58.0.0/16", start_ip = "10.58.0.2", end_ip = "10.58.0.254", dhcp_enabled = true, no_gateway = false },
-      { region = "EU-WEST-GRA", cidr = "10.36.0.0/16", start_ip = "10.36.0.2", end_ip = "10.36.0.254", dhcp_enabled = false, no_gateway = true },
-    ]
+    name    = "backend"
+    regions = ["EU-WEST-PAR", "EU-WEST-GRA"]
+    subnets = {
+      "EU-WEST-PAR" = { region = "EU-WEST-PAR", network = "10.58.0.0/16", start = "10.58.0.2", end = "10.58.0.254", dhcp = true, no_gateway = false }
+      "EU-WEST-GRA" = { region = "EU-WEST-GRA", network = "10.36.0.0/16", start = "10.36.0.2", end = "10.36.0.254", dhcp = false, no_gateway = true }
+    }
   }
 
   assert {
     condition     = ovh_cloud_project_network_private.this[0].name == "backend"
-    error_message = "network_name must name the network."
+    error_message = "name must name the network."
   }
 
   assert {
@@ -88,7 +88,7 @@ run "subnets" {
       ovh_cloud_project_network_private_subnet.this["EU-WEST-GRA"].dhcp == false &&
       ovh_cloud_project_network_private_subnet.this["EU-WEST-GRA"].no_gateway == true
     )
-    error_message = "cidr, start_ip, end_ip, dhcp_enabled and no_gateway must reach the subnet."
+    error_message = "network, start, end, dhcp and no_gateway must reach the subnet."
   }
 
   assert {
@@ -100,15 +100,15 @@ run "subnets" {
 run "gateways" {
   variables {
     create_gateway = true
-    network_region = ["EU-WEST-PAR", "EU-WEST-GRA"]
-    subnets = [
-      { region = "EU-WEST-PAR", cidr = "10.58.0.0/16", start_ip = "10.58.0.2", end_ip = "10.58.0.254", dhcp_enabled = true, no_gateway = false },
-      { region = "EU-WEST-GRA", cidr = "10.36.0.0/16", start_ip = "10.36.0.2", end_ip = "10.36.0.254", dhcp_enabled = true, no_gateway = false },
-    ]
-    gateways = [
-      { region = "EU-WEST-PAR", name = "gw-par", model = "s" },
-      { region = "EU-WEST-GRA", name = "gw-gra", model = "s" },
-    ]
+    regions        = ["EU-WEST-PAR", "EU-WEST-GRA"]
+    subnets = {
+      "EU-WEST-PAR" = { region = "EU-WEST-PAR", network = "10.58.0.0/16", start = "10.58.0.2", end = "10.58.0.254", dhcp = true, no_gateway = false }
+      "EU-WEST-GRA" = { region = "EU-WEST-GRA", network = "10.36.0.0/16", start = "10.36.0.2", end = "10.36.0.254", dhcp = true, no_gateway = false }
+    }
+    gateways = {
+      "EU-WEST-PAR" = { region = "EU-WEST-PAR", name = "gw-par", model = "s" }
+      "EU-WEST-GRA" = { region = "EU-WEST-GRA", name = "gw-gra", model = "s" }
+    }
   }
 
   assert {

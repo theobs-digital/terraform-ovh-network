@@ -10,4 +10,4 @@ terraform apply -var service_name=<Public Cloud project ID>
 ```
 
 A gateway uses the network of its region: every region of `gateways` must be
-in `network_region`.
+in `regions`.
