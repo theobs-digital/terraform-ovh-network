@@ -7,6 +7,10 @@ and this module adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- The workflow `Release` tags each version itself: on each push to `main`, the commits since the last tag give the version (Conventional Commits: a breaking change a minor release before v1.0.0, `feat` a minor one, `fix` and `perf` a patch), then it dates this section, bumps the `?ref=` of the README, commits `chore: release vX.Y.Z`, tags it and creates the GitHub release. Each pull request writes its changes under `[Unreleased]`
+
 ## [0.2.0] - 2026-10-18
 
 ### Added
