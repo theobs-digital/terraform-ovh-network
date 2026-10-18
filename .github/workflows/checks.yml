@@ -67,12 +67,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      TERRAFORM: "1.3.10"
+      TERRAFORM: "1.4.7"
       MODULE: "."
       EXAMPLES: "examples/basic examples/complete"
       PROVIDERS: |
         ovh = { source = "ovh/ovh", version = "2.5.0" }
-        null = { source = "hashicorp/null", version = "3.0.0" }
     defaults:
       run:
         shell: bash

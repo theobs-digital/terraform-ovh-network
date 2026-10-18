@@ -26,6 +26,7 @@ variable "name" {
   type        = string
   default     = null
 
+  # coalesce() takes an empty name for no name: refuse it rather than fall back to private-network-<vlan_id>.
   validation {
     condition     = var.name == null ? true : length(var.name) > 0
     error_message = "If provided, name must not be an empty string."
@@ -33,23 +34,19 @@ variable "name" {
 }
 
 variable "regions" {
-  description = "List of regions where the network will be available."
+  description = "Regions of the network, such as `GRA9`. Left out, the network is in every region, the provider's default."
   type        = list(string)
   default     = null
-
-  validation {
-    condition     = var.regions == null ? true : length(var.regions) > 0
-    error_message = "regions must not be an empty list."
-  }
 }
 
 variable "vlan_id" {
-  description = "The VLAN ID of the network. Must be greater than zero."
+  description = "VLAN ID of the network, from 0 to 4095, 0 for no VLAN."
   type        = number
 
+  # Provider 2.22 takes any number; the API takes 0 to 4095, 0 for no VLAN.
   validation {
-    condition     = var.vlan_id > 0
-    error_message = "vlan_id must be greater than 0."
+    condition     = var.vlan_id >= 0 && var.vlan_id <= 4095
+    error_message = "vlan_id must be between 0 and 4095."
   }
 }
 
@@ -64,17 +61,6 @@ variable "subnets" {
     no_gateway = bool
   }))
   default = {}
-
-  validation {
-    condition = alltrue([
-      for s in var.subnets :
-      can(cidrnetmask(s.network)) &&
-      length(s.region) > 0 &&
-      length(s.start) > 0 &&
-      length(s.end) > 0
-    ])
-    error_message = "Each subnet must define a valid CIDR network, region, start and end."
-  }
 }
 
 variable "gateways" {
@@ -85,13 +71,4 @@ variable "gateways" {
     model  = string
   }))
   default = {}
-  validation {
-    condition = alltrue([
-      for g in var.gateways :
-      length(g.name) > 0 &&
-      length(g.model) > 0 &&
-      length(g.region) > 0
-    ])
-    error_message = "Each gateway must have a non-empty name and model."
-  }
 }

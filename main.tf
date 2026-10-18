@@ -4,8 +4,7 @@
 
 locals {
   # Defaults
-  network_name    = coalesce(var.name, "private-network-${var.vlan_id}")
-  network_regions = coalescelist(var.regions, ["EU-WEST-PAR"])
+  network_name = coalesce(var.name, "private-network-${var.vlan_id}")
 
   create_network = var.create_network
 
@@ -24,7 +23,7 @@ locals {
 # Global validations (toujours exécutées)
 ###############################################################################
 
-resource "null_resource" "validations" {
+resource "terraform_data" "validations" {
   lifecycle {
     precondition {
       condition     = !(local.create_subnet || local.create_gateway) || local.create_network
@@ -52,7 +51,7 @@ resource "ovh_cloud_project_network_private" "this" {
 
   service_name = var.service_name
   name         = local.network_name
-  regions      = local.network_regions
+  regions      = var.regions
   vlan_id      = var.vlan_id
 }
 

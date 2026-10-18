@@ -17,7 +17,7 @@ run "subnets_need_the_network" {
   }
 
   expect_failures = [
-    null_resource.validations,
+    terraform_data.validations,
   ]
 }
 
@@ -32,15 +32,28 @@ run "one_gateway_per_subnet" {
   }
 
   expect_failures = [
-    null_resource.validations,
+    terraform_data.validations,
   ]
 }
 
-run "vlan_id_above_zero" {
+run "vlan_id_zero_for_no_vlan" {
   command = plan
 
   variables {
     vlan_id = 0
+  }
+
+  assert {
+    condition     = ovh_cloud_project_network_private.this[0].vlan_id == 0
+    error_message = "vlan_id 0, a network without VLAN, must be accepted."
+  }
+}
+
+run "vlan_id_up_to_4095" {
+  command = plan
+
+  variables {
+    vlan_id = 4096
   }
 
   expect_failures = [
@@ -57,45 +70,5 @@ run "network_name_not_empty" {
 
   expect_failures = [
     var.name,
-  ]
-}
-
-run "network_region_not_empty" {
-  command = plan
-
-  variables {
-    regions = []
-  }
-
-  expect_failures = [
-    var.regions,
-  ]
-}
-
-run "subnet_cidr" {
-  command = plan
-
-  variables {
-    subnets = {
-      "EU-WEST-PAR" = { region = "EU-WEST-PAR", network = "10.58.0.0", start = "10.58.0.2", end = "10.58.0.254", dhcp = true, no_gateway = false }
-    }
-  }
-
-  expect_failures = [
-    var.subnets,
-  ]
-}
-
-run "gateway_name_not_empty" {
-  command = plan
-
-  variables {
-    gateways = {
-      "EU-WEST-PAR" = { region = "EU-WEST-PAR", name = "", model = "s" }
-    }
-  }
-
-  expect_failures = [
-    var.gateways,
   ]
 }

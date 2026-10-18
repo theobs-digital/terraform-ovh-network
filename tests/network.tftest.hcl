@@ -26,11 +26,6 @@ run "network_only" {
   }
 
   assert {
-    condition     = tolist(ovh_cloud_project_network_private.this[0].regions) == tolist(["EU-WEST-PAR"])
-    error_message = "Without regions, the network must be in EU-WEST-PAR."
-  }
-
-  assert {
     condition     = length(ovh_cloud_project_network_private_subnet.this) == 0 && length(ovh_cloud_project_gateway.this) == 0
     error_message = "No subnet and no gateway must be created."
   }
